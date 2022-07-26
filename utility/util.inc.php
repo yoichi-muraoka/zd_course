@@ -9,6 +9,13 @@ function h($string, $echo = true) {
 }
 
 /**
+ * リクエストメソッドがPOSTか否かを判定
+ */
+function is_post() {
+  return $_SERVER["REQUEST_METHOD"] === "POST";
+}
+
+/**
  * コンテキストルートを含むルートパスに変換
  */
 function root_path($path, $echo = true) {
@@ -18,6 +25,18 @@ function root_path($path, $echo = true) {
     $prefix = "/" . CONTEXT_ROOT . "/";
   }
   return h($prefix . $path, $echo);
+}
+
+/**
+ * リダイレクト
+ */
+function send_redirect($location, $absolutePath = true) {
+  if($absolutePath) {
+    header("Location: /" . CONTEXT_ROOT . "/" . $location);
+  } else {
+    header("Location: " . $location);
+  }
+  exit;
 }
 
 /**
@@ -94,11 +113,12 @@ function auth_confirm($role = "student") {
 /**
  * セッションに情報を格納(サインイン)
  */
-function set_auth_info($zdid, $name, $role) {
+function set_auth_info($zdid, $name, $role, $id = null) {
   $_SESSION["login"] = [
     "zdid" => $zdid,
     "name" => $name,
-    "role" => $role
+    "role" => $role,
+    "id" => $id
   ];
 }
 

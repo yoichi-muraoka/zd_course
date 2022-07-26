@@ -40,7 +40,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
       // IDとパスワードの両方が正しい
       session_regenerate_id();
-      set_auth_info($student["zdid"], $student["name"], "student");
+      set_auth_info($student["zdid"], $student["name"], "student", $student["id"]);
       header("Location: student/index.php");
       exit;
     }

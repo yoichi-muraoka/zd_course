@@ -7906,3 +7906,79 @@ footer .text-center a {
 .intro li a:hover {
   background: #7ac6eb;
 }
+
+/* utility */
+.w-100 {
+  width: 100%;
+}
+
+.h-5em {
+  height: 5em;
+}
+
+.h-10em {
+  height: 10em;
+}
+
+.lh-1 {
+  line-height: 1;
+}
+
+.lh-1-5 {
+  line-height: 1.5;
+}
+
+.correct {
+  background: #ddeddd;
+  border: 2px solid #009688;
+}
+
+.incorrect {
+  background: #f1e8e9;
+  border: 2px solid #bb1029;
+}
+
+.correct + span, .incorrect + span {
+  margin-left: 8px;
+  font-size: 20px;
+}
+
+.correct + span {
+  color: #009688;
+}
+
+.incorrect + span {
+  color: #bb1029;
+}
+
+.exam-result {
+  display: flex;
+  align-items: top;
+}
+
+.exam-result h1 {
+  margin-top: 0;
+  margin-right: 20px;
+}
+
+.exam-result h1 .student-name {
+  font-size: 0.75em;
+}
+
+.exam-result > p span {
+  font-size: 2.5em;
+  line-height: 1;
+}
+
+.edit-score-buttons form {
+  margin: 30px 0;
+}
+
+.edit-score-buttons .edit-status {
+  margin-top: 15px;
+}
+
+.answer-blank {
+  border: 1px solid #000;
+  padding: 0 2em;
+}

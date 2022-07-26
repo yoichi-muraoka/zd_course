@@ -47,7 +47,6 @@ catch (PDOException $e) {
   <title>生徒登録</title>
   <link rel="stylesheet" href="/zd_course/css/styles.css">
 </head>
-</head>
 <body>
 <header class="admin-header">
   <div class="container">

@@ -5,26 +5,14 @@ auth_confirm("teacher");
 
 $teacher = $_SESSION["login"];
 
-// 結果の更新
-if($_SERVER["REQUEST_METHOD"] === "POST") {
-  $id = $_POST["id"];
-  $testedAt = $_POST["tested_at"];
-  $title = $_POST["title"];
-  $fullscore = $_POST["fullscore"];
-  $summery = $_POST["summery"];
-
-  try {
-    update_exams($id, $testedAt, $title, $fullscore, $summery);
-  }
-  catch (PDOException $e) {
-    echo $e->getMessage();
-    echo "<p>申し訳ありませんが、しばらく時間をおいてからアクセスしてください</p>";
-    exit;
-  }
+$examId = $_GET["exam_id"];
+if(!isset($examId)) {
+  header("Location: schedule.php");
+  return;
 }
 
 try {
-  $examList = get_exams();
+  $questionList = get_questions($examId);
 }
 catch (PDOException $e) {
   echo $e->getMessage();
@@ -78,38 +66,40 @@ catch (PDOException $e) {
 <div class="container admin-container">
   <main>
     <p>
-      <a href="/zd_course/admin/exam/result.php" class="btn btn-primary">得点の入力</a>
-      <a href="/zd_course/admin/students/register.php" class="btn btn-primary">生徒リストの更新</a>
+      <a href="/zd_course/admin/exam/examAdd.php?exam_id=<?php echo $examId; ?>" class="btn btn-primary">問題の追加</a>
+      <a href="/zd_course/admin/exam/schedule.php" class="btn btn-success">試験日程に戻る</a>
     </p>
     <hr>
-    <h2>小テストスケジュール</h2>
-    <table class="table">
-      <tr>
-        <th>日付</th>
-        <td>科目名</td>
-        <td>満点</td>
-        <td>内容</td>
-        <td>操作</td>
-      </tr>
-      <?php foreach($examList as $exam): ?>
-      <tr>
-        <form action="" method="post" class="form">
-          <td><input type="date" name="tested_at" value="<?php h($exam["tested_at"]); ?>"></td>
-          <td><input type="text" name="title" value="<?php h($exam["title"]); ?>"></td>
-          <td><input type="number" name="fullscore" value="<?php h($exam["fullscore"]); ?>"></td>
-          <td><textarea name="summery" cols="50" rows="5"><?php h($exam["summery"]); ?></textarea></td>
-          <td>
-              <input type="hidden" name="id" value="<?php h($exam["id"]); ?>">
-              <input type="submit" class="btn btn-success" value="更新">
-              <a href="examPreview.php?exam_id=<?php h($exam["id"]); ?>" class="btn btn-warning">試験問題</a>
-          </td>
-        </form>
-      </tr>
-      <?php endforeach; ?>
-    </table>
+    <?php foreach($questionList as $question): ?>
+      <section>
+        <h2>問<?php echo $question["num"]; ?></h2>
+        <?php echo $question["sentence"]; ?>
+        <h3>答え</h3>
+        <?php echo $question["answer"]; ?>
+        <p>
+          正解: <?php echo $question["right_answer"]; ?>　
+          配点: <?php echo $question["score"]; ?>
+        </p>
+        <p><a href="examEdit.php?id=<?php echo $question["id"]; ?>" class="btn btn-warning">編集</a></p>
+        <hr>
+      </section>
+    <?php endforeach; ?>
   </main>
 </div>
 <script src="/zd_course/js/jquery-2.1.4.min.js"></script>
 <script src="/zd_course/js/bootstrap.min.js"></script>
+<script>
+// 問題文中のHTMLタグを表示
+function htmlToReference() {
+  $('pre.html-code').each(function() {
+    const html = $(this).html();
+    $(this).text(html);
+  });
+}
+
+$(document).ready(function() {
+  htmlToReference();
+});
+</script>
 </body>
 </html>

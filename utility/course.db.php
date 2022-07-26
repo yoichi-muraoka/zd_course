@@ -66,18 +66,41 @@ function get_scores() {
   return $resultSet;
 }
 
+function get_score($examId, $studentId) {
+  $pdo = db_init();
+  $sql = "SELECT * from sc_scores
+          WHERE exam_id = ?
+          AND student_id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$examId, $studentId]);
+  return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function get_finished_exam_scores($studentId) {
+  $pdo = db_init();
+  $sql = "SELECT
+          sc_scores.id, sc_scores.exam_id, sc_scores.score, sc_scores.submitted_at,
+          sc_exams.title, sc_exams.fullscore, sc_exams.tested_at
+          from sc_scores JOIN sc_exams ON sc_scores.exam_id = sc_exams.id
+          WHERE student_id = ?
+          AND NOT isnull(answers)";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$studentId]);
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 /*--------------------
  得点のアップデート
 ----------------------*/
-function update_score($studentId, $examId, $score) {
+function update_score($studentId, $examId, $score, $submittedAt = null, $answers = null) {
   $pdo = db_init();
   $sql = "DELETE FROM sc_scores WHERE student_id = ? AND exam_id = ?";
   $stmt = $pdo->prepare($sql);
   $stmt->execute([$studentId, $examId]);
 
-  $sql = "INSERT INTO sc_scores VALUES (NULL, ?, ?, ?)";
+  $sql = "INSERT INTO sc_scores VALUES (NULL, ?, ?, ?, ?, ?)";
   $stmt = $pdo->prepare($sql);
-  $stmt->execute([$examId, $studentId, $score]);
+  $stmt->execute([$examId, $studentId, $score, $submittedAt, $answers]);
 }
 
 function update_scores($scoreList, $examId) {
@@ -105,6 +128,24 @@ function update_scores($scoreList, $examId) {
   $stmt->execute($params);
 }
 
+function fix_score($studentId, $examId, $score) {
+  $pdo = db_init();
+  $sql = "UPDATE sc_scores
+          SET score = ?
+          WHERE student_id = ? AND exam_id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$score, $studentId, $examId]);
+}
+
+function reset_score($studentId, $examId) {
+  $pdo = db_init();
+  $sql = "UPDATE sc_scores
+          SET score = 0, submitted_at = null, answers = null
+          WHERE student_id = ? AND exam_id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$studentId, $examId]);
+}
+
 
 /*------------------
    全得点を0点にする
@@ -117,7 +158,7 @@ function all_scores_to_zero() {
   $sql = "TRUNCATE TABLE sc_scores";
   $pdo->exec($sql);
 
-  $sql = "INSERT INTO sc_scores VALUES (NULL, ?, ?, 0)";
+  $sql = "INSERT INTO sc_scores VALUES (NULL, ?, ?, 0, NULL, NULL)";
   $stmt = $pdo->prepare($sql);
   foreach($exams as $exam) {
     foreach($students as $student) {
@@ -137,6 +178,27 @@ function get_exams() {
   return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function get_exam_by_id($examId) {
+  $pdo = db_init();
+  $sql = "SELECT * FROM sc_exams WHERE id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$examId]);
+  return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function get_unfinished_exams($studentId) {
+  $pdo = db_init();
+  $sql = "SELECT
+          sc_exams.id, sc_exams.summery,
+          sc_exams.title, sc_exams.fullscore, sc_exams.tested_at
+          from sc_scores JOIN sc_exams ON sc_scores.exam_id = sc_exams.id
+          WHERE student_id = ?
+          AND isnull(answers)";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$studentId]);
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function update_exams($id, $testedAt, $title, $fullscore, $summery) {
   $pdo = db_init();
   $sql = "UPDATE sc_exams 
@@ -145,6 +207,46 @@ function update_exams($id, $testedAt, $title, $fullscore, $summery) {
   $stmt = $pdo->prepare($sql);
   $stmt->execute([$testedAt, $title, $fullscore, $summery, $id]);
 }
+
+/*-------------------
+     試験問題
+--------------------*/
+function get_questions($examId = 0) {
+  $pdo = db_init();
+  $sql = "SELECT * FROM sc_questions
+          WHERE exam_id = ?
+          ORDER BY num";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$examId]);
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function get_question($id = 0) {
+  $pdo = db_init();
+  $sql = "SELECT * FROM sc_questions
+          WHERE id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$id]);
+  return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function add_question($examId, $num, $sentence, $answer, $rightAnswer, $score) {
+  $pdo = db_init();
+  $sql = "INSERT INTO sc_questions (exam_id, num, sentence, answer, right_answer, score)
+          VALUES (?, ?, ?, ?, ?, ?)";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$examId, $num, $sentence, $answer, $rightAnswer, $score]);
+}
+
+function update_question($examId, $num, $sentence, $answer, $rightAnswer, $score, $id) {
+  $pdo = db_init();
+  $sql = "UPDATE sc_questions 
+          SET exam_id = ?, num = ?, sentence = ?, answer = ?, right_answer = ?, score = ?
+          WHERE id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$examId, $num, $sentence, $answer, $rightAnswer, $score, $id]);
+}
+
 
 
 /*-----------------
@@ -160,7 +262,8 @@ function get_students() {
 function get_student_name($id) {
   $pdo = db_init();
   $sql = "SELECT name FROM sc_students WHERE id = ?";
-  $stmt = $pdo->query($sql);
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$id]);
   $info = $stmt->fetch(PDO::FETCH_ASSOC);
   return $info["name"];
 }

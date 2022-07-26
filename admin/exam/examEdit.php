@@ -5,16 +5,24 @@ auth_confirm("teacher");
 
 $teacher = $_SESSION["login"];
 
-// 結果の更新
+$id = $_GET["id"];
+if(!isset($id)) {
+  header("Location: schedule.php");
+  return;
+}
+
 if($_SERVER["REQUEST_METHOD"] === "POST") {
-  $id = $_POST["id"];
-  $testedAt = $_POST["tested_at"];
-  $title = $_POST["title"];
-  $fullscore = $_POST["fullscore"];
-  $summery = $_POST["summery"];
+  $examId = $_POST["exam_id"];
+  $num = $_POST["num"];
+  $sentence = $_POST["sentence"];
+  $answer = $_POST["answer"];
+  $rightAnswer = $_POST["right_answer"];
+  $score = $_POST["score"];
 
   try {
-    update_exams($id, $testedAt, $title, $fullscore, $summery);
+    update_question($examId, $num, $sentence, $answer, $rightAnswer, $score, $id);
+    header("Location: examPreview.php?exam_id={$examId}");
+    return;
   }
   catch (PDOException $e) {
     echo $e->getMessage();
@@ -23,23 +31,25 @@ if($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 
+
 try {
-  $examList = get_exams();
+  $question = get_question($id);
+  $exams = get_exams(); // 試験一覧
 }
 catch (PDOException $e) {
   echo $e->getMessage();
   echo "<p>申し訳ありませんが、しばらく時間をおいてからアクセスしてください</p>";
   exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scores</title>
+  <title>設問登録</title>
   <link rel="stylesheet" href="/zd_course/css/styles.css">
-</head>
 </head>
 <body>
 <header class="admin-header">
@@ -77,36 +87,48 @@ catch (PDOException $e) {
 </header>
 <div class="container admin-container">
   <main>
-    <p>
-      <a href="/zd_course/admin/exam/result.php" class="btn btn-primary">得点の入力</a>
-      <a href="/zd_course/admin/students/register.php" class="btn btn-primary">生徒リストの更新</a>
-    </p>
-    <hr>
-    <h2>小テストスケジュール</h2>
-    <table class="table">
-      <tr>
-        <th>日付</th>
-        <td>科目名</td>
-        <td>満点</td>
-        <td>内容</td>
-        <td>操作</td>
-      </tr>
-      <?php foreach($examList as $exam): ?>
-      <tr>
-        <form action="" method="post" class="form">
-          <td><input type="date" name="tested_at" value="<?php h($exam["tested_at"]); ?>"></td>
-          <td><input type="text" name="title" value="<?php h($exam["title"]); ?>"></td>
-          <td><input type="number" name="fullscore" value="<?php h($exam["fullscore"]); ?>"></td>
-          <td><textarea name="summery" cols="50" rows="5"><?php h($exam["summery"]); ?></textarea></td>
-          <td>
-              <input type="hidden" name="id" value="<?php h($exam["id"]); ?>">
-              <input type="submit" class="btn btn-success" value="更新">
-              <a href="examPreview.php?exam_id=<?php h($exam["id"]); ?>" class="btn btn-warning">試験問題</a>
-          </td>
-        </form>
-      </tr>
-      <?php endforeach; ?>
-    </table>
+    <form action="" method="post">
+      <h2>設問の追加</h2>
+      <p>単元:
+        <select name="exam_id">
+          <?php foreach($exams as $exam): ?>
+            <option value="<?php echo $exam["id"]; ?>"
+                   <?php echo $question["exam_id"] == $exam["id"] ? "selected" : "" ?> >
+              <?php echo $exam["title"]; ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </p>
+      <p>設問番号:
+        <select name="num">
+          <?php for($i = 1; $i <= 15; $i++): ?>
+            <option <?php echo $i == $question["num"] ? "selected" : "" ?>>
+            <?php echo $i; ?></option>
+          <?php endfor; ?>
+        </select>
+      </p>
+      <p>配点:
+        <select name="score">
+          <?php for($i = 1; $i <= 10; $i++): ?>
+            <option value="<?php echo $i; ?>" <?php echo $i == $question["score"] ? "selected" : "" ?>>
+            <?php echo $i; ?>点</option>
+          <?php endfor; ?>
+        </select>
+      </p>
+      <p>問題文:<br>
+        <textarea name="sentence" class="w-100 h-10em lh-1"><?php echo $question["sentence"]; ?></textarea>
+      </p>
+      <p>解答欄:<br>
+        <textarea name="answer" class="w-100 h-10em lh-1"><?php echo $question["answer"]; ?></textarea>
+      </p>
+      <p>正答:
+        <input type="text" name="right_answer" class="w-100" value="<?php echo $question["right_answer"]; ?>">
+      </p>
+      <p>
+        <input type="submit" class="btn btn-primary" value="更新">
+        <a href="examPreview.php?exam_id=<?php echo $question["exam_id"]; ?>" class="btn btn-success">キャンセル</a>
+      </p>
+    </form>
   </main>
 </div>
 <script src="/zd_course/js/jquery-2.1.4.min.js"></script>
