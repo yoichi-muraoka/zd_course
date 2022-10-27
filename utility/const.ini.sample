@@ -1,0 +1,6 @@
+DB_NAME = "zd_course_db"
+DB_USER = "root"
+DB_PASS = ""
+
+COURSE_START = "2022-05-02"
+COURSE_END = "2021-10-31"

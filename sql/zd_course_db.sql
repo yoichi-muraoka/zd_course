@@ -1,14 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.0.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: 2022 年 7 朁E20 日 13:36
--- サーバのバージョン： 10.1.32-MariaDB
--- PHP Version: 5.6.36
+-- ホスト: 127.0.0.1
+-- 生成日時: 2022-10-27 07:01:09
+-- サーバのバージョン： 10.4.25-MariaDB
+-- PHP のバージョン: 8.1.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -19,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `zd_course_db`
+-- データベース: `zd_course_db`
 --
 
 -- --------------------------------------------------------
@@ -47,6 +46,27 @@ INSERT INTO `sc_exams` (`id`, `tested_at`, `title`, `fullscore`, `summery`) VALU
 (4, '2021-04-28', 'JavaScript', 50, '穴埋め問題 (一部選択問題あり)\r\n・変数と演算子\r\n・分岐処理(if文)と反復処理(for文)\r\n・配列\r\n・関数\r\n・jQueryのメソッド名(選択式)'),
 (5, '2022-05-31', 'Servlet / MySQL', 50, '・SELECT文によるデータ取得(穴埋め)\r\n・入力値の取得と型変換(選択問題)\r\n・フォワードとリダイレクト(選択問題)\r\n・PreparedStatementとSQLの実行・変数と演算子(選択問題)'),
 (6, '2022-06-01', 'Linux / Git', 50, '全問選択式問題\r\n・Linuxコマンド(ファイル、ディレクトリの操作)\r\n　細かいオプションは暗記不要\r\n・Gitの基本用語');
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `sc_presentation`
+--
+
+CREATE TABLE `sc_presentation` (
+  `zdid` char(6) NOT NULL,
+  `anydesk` varchar(20) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `note` varchar(1000) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- テーブルのデータのダンプ `sc_presentation`
+--
+
+INSERT INTO `sc_presentation` (`zdid`, `anydesk`, `url`, `note`) VALUES
+('zd1A01', 'aaa', 'https://villhill.net', 'aaa\r\nあああ'),
+('zd1A03', 'zzzz', 'https://newhope.jp', '');
 
 -- --------------------------------------------------------
 
@@ -140,7 +160,7 @@ CREATE TABLE `sc_scores` (
   `id` int(11) NOT NULL,
   `exam_id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
-  `score` int(11) NOT NULL DEFAULT '0',
+  `score` int(11) NOT NULL DEFAULT 0,
   `submitted_at` date DEFAULT NULL,
   `answers` varchar(1000) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -226,71 +246,77 @@ INSERT INTO `sc_teachers` (`id`, `zdid`, `pass`, `name`) VALUES
 (2, 'zdis57', 'cc63035884240018085bacc74951562e2035a89ed724ea0c52b12008c0118c8b', '古川 みゆき');
 
 --
--- Indexes for dumped tables
+-- ダンプしたテーブルのインデックス
 --
 
 --
--- Indexes for table `sc_exams`
+-- テーブルのインデックス `sc_exams`
 --
 ALTER TABLE `sc_exams`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `sc_questions`
+-- テーブルのインデックス `sc_presentation`
+--
+ALTER TABLE `sc_presentation`
+  ADD PRIMARY KEY (`zdid`);
+
+--
+-- テーブルのインデックス `sc_questions`
 --
 ALTER TABLE `sc_questions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `sc_scores`
+-- テーブルのインデックス `sc_scores`
 --
 ALTER TABLE `sc_scores`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `sc_students`
+-- テーブルのインデックス `sc_students`
 --
 ALTER TABLE `sc_students`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `zdid` (`zdid`);
 
 --
--- Indexes for table `sc_teachers`
+-- テーブルのインデックス `sc_teachers`
 --
 ALTER TABLE `sc_teachers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `zdid` (`zdid`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- ダンプしたテーブルの AUTO_INCREMENT
 --
 
 --
--- AUTO_INCREMENT for table `sc_exams`
+-- テーブルの AUTO_INCREMENT `sc_exams`
 --
 ALTER TABLE `sc_exams`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `sc_questions`
+-- テーブルの AUTO_INCREMENT `sc_questions`
 --
 ALTER TABLE `sc_questions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
--- AUTO_INCREMENT for table `sc_scores`
+-- テーブルの AUTO_INCREMENT `sc_scores`
 --
 ALTER TABLE `sc_scores`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
--- AUTO_INCREMENT for table `sc_students`
+-- テーブルの AUTO_INCREMENT `sc_students`
 --
 ALTER TABLE `sc_students`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `sc_teachers`
+-- テーブルの AUTO_INCREMENT `sc_teachers`
 --
 ALTER TABLE `sc_teachers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;

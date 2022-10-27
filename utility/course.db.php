@@ -321,3 +321,27 @@ function get_teacher_by_zdid($zdid) {
   $stmt->execute([$zdid]);
   return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
+/*--------------------
+    AnyDeskテーブル
+--------------------*/
+function get_presentation() {
+  $pdo = db_init();
+  $stmt = $pdo->prepare("SELECT * FROM sc_presentation ORDER BY zdid");
+  $stmt->execute([]);
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function get_presentation_by_zdid($zdid) {
+  $pdo = db_init();
+  $stmt = $pdo->prepare("SELECT * FROM sc_presentation WHERE zdid = ?");
+  $stmt->execute([$zdid]);
+  return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function register_presentation($zdid, $anydesk, $url, $note) {
+  $pdo = db_init();
+  $sql = "INSERT INTO sc_presentation (zdid, anydesk, url, note) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE anydesk = VALUES(anydesk), url = VALUES(url), note = VALUES(note)";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$zdid, $anydesk, $url, $note]);
+}

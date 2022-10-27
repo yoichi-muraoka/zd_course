@@ -23,6 +23,7 @@ auth_confirm();
     <h2>コース運営</h2>
     <ul>
       <li><a href="/zd_course/student/exam/">小テスト日程／得点</a></li>
+      <li><a href="/zd_course/student/presentation.php" target="_blank">プレゼン情報の登録</a></li>
       <li><a href="https://s21.studirus.com" target="_blank">Studirus</a></li>
       <?php /*
       <li><a href="<?php echo COURSE_GOOGLE_DRIVE_URL; ?>" target="_blank">Google Drive</a></li>

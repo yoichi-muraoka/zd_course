@@ -4,6 +4,15 @@ require_once $_SERVER["DOCUMENT_ROOT"] . "/zd_course/utility/include.php";
 auth_confirm("teacher");
 
 $teacher = $_SESSION["login"];
+
+try {
+  // DBから登録済みのAnyDeskAddressを取得
+  $presentationList = get_presentation();
+} catch(PDOException $e) {
+  echo $e->getMessage();
+  echo "<p>申し訳ありませんが、しばらく時間をおいてからアクセスしてください</p>";
+  exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -50,12 +59,23 @@ $teacher = $_SESSION["login"];
 </header>
 <div class="container admin-container">
   <main>
-    <h2>コース運営</h2>
-    <ul>
-      <li><a href="students/register.php">生徒登録</a></li>
-      <li><a href="exam/result.php">小テスト</a></li>
-      <li><a href="presentationList.php">プレゼン情報</a></li>
-    </ul>
+    <h2>プレゼン情報</h2>
+    <table class="table table-hover table-striped">
+      <tr>
+        <th>ID</th>
+        <th>Anydesk</th>
+        <th>URL</th>
+        <th>備考</th>
+      </tr>
+      <?php foreach($presentationList as $p): ?>
+        <tr>
+          <td><?php h($p["zdid"]) ?></td>
+          <td><?php h($p["anydesk"]) ?></td>
+          <td><a href="<?php h($p["url"]) ?>" target="_blank"><?php h($p["url"]) ?></a></td>
+          <td><?php echo nl2br($p["note"]); ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </table>
   </main>
 </div>
 <script src="/zd_course/js/jquery-2.1.4.min.js"></script>
